@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CB MKG INDONESIA - Development Afis</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to top right, #3a7bd5, #00d2ff);
+      color: white;
+      text-align: center;
+    }
+    header {
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+    h1 {
+      margin: 0;
+    }
+    select, button {
+      padding: 10px;
+      margin: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+    #weather {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CB MKG INDONESIA</h1>
+    <p>Development Afis</p>
+  </header>
+
+  <div>
+    <select id="city">
+      <option value="Nunukan,ID">Nunukan</option>
+      <option value="Jakarta,ID">Jakarta</option>
+      <option value="Surabaya,ID">Surabaya</option>
+      <option value="Bandung,ID">Bandung</option>
+      <option value="Medan,ID">Medan</option>
+      <option value="Makassar,ID">Makassar</option>
+      <option value="Denpasar,ID">Denpasar</option>
+    </select>
+    <button onclick="getWeather()">Check Weather</button>
+    <button onclick="getWeatherByLocation()">Use GPS</button>
+    <div id="weather">Loading weather...</div>
+  </div>
+
+  <script>
+    const apiKey = "d9b63af50fefb4e9cd7111134e605dfd";
+
+    async function getWeather() {
+      const city = document.getElementById("city").value;
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      showWeather(data);
+    }
+
+    async function getWeatherByLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async position => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+          const res = await fetch(url);
+          const data = await res.json();
+          showWeather(data);
+        });
+      } else {
+        document.getElementById("weather").innerText = "Geolocation is not supported.";
+      }
+    }
+
+    function showWeather(data) {
+      const weatherDiv = document.getElementById("weather");
+      if (data.main) {
+        weatherDiv.innerHTML = `
+          <h2>${data.name}</h2>
+          <p>${data.weather[0].description.toUpperCase()}</p>
+          <p>Temperature: ${data.main.temp}°C</p>
+          <p>Humidity: ${data.main.humidity}%</p>
+          <p>Wind: ${data.wind.speed} m/s</p>
+        `;
+      } else {
+        weatherDiv.innerText = "Weather data not found.";
+      }
+    }
+
+    setInterval(getWeather, 1000); // auto refresh setiap 1 detik
+    window.onload = getWeather; // default saat load
+  </script>
+</body>
+</html>
